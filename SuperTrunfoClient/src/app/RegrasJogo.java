@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -30,6 +31,9 @@ public final class RegrasJogo {
 	}
 
 	private static boolean compararAtributo(AtributoCarta atributo, AtributoCarta atributoAdversario) {
+
+		System.out.println("Atributo comparado: "+ atributo.getNome());
+
 		return atributo.getValor() > atributoAdversario.getValor();
 	}
 
@@ -37,8 +41,15 @@ public final class RegrasJogo {
 		return JOGADOR.deckIsEmpty();
 	}
 
+	public static boolean fimDeJogo() {
+		return false;
+	}
+
 	public static Carta compararCarta(Carta cartaAdversario, AtributoCarta atributo) {
 		Carta cartaEmJogo = JOGADOR.removeCartaTopoDeck();
+
+		System.out.println("\nCarta do adversário:");
+		printDetalhesCarta(cartaAdversario);
 
 		if (compararAtributo(
 				cartaEmJogo.getAtributo(atributo)
@@ -67,7 +78,6 @@ public final class RegrasJogo {
 		int iAtributo = scanner.nextInt();
 
 		AtributoCarta atributoEscolhido = cartaEmJogo.getListaAtributos().get(iAtributo);
-		System.out.println(atributoEscolhido.getNome() + ": " + atributoEscolhido.getValor());
 
 		Socket socketToServer;
 		try {
@@ -75,7 +85,9 @@ public final class RegrasJogo {
 			ObjectOutputStream outputStream = new ObjectOutputStream(socketToServer.getOutputStream());
 			ObjectInputStream inputStream = new ObjectInputStream(socketToServer.getInputStream());
 
-			outputStream.writeObject(cartaEmJogo);
+			HashMap<Carta, AtributoCarta> mapa = new HashMap<Carta, AtributoCarta>();
+			mapa.put(cartaEmJogo, atributoEscolhido);
+			outputStream.writeObject(mapa);
 
 			cartaAdversario = (Carta) inputStream.readObject();
 			compararCarta(cartaAdversario, atributoEscolhido);

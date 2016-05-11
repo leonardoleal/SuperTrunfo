@@ -5,10 +5,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ServerSocketFactory;
 
-import model.AtributoVelocidade;
+import model.AtributoCarta;
 import model.Carta;
 
 public class SuperTrunfoListener extends Thread {
@@ -48,12 +50,18 @@ public class SuperTrunfoListener extends Thread {
         public void run() {
             while (true) {
                 try {
-                    Object cartaAdversario = inputStream.readObject();
-                    System.out.println("Read object: "+((Carta) cartaAdversario).getNome());
+                	Carta cartaAdversario = null;
+                	AtributoCarta atributoEscolhido = null;
+                    Map<Carta, AtributoCarta> mapa = (HashMap<Carta, AtributoCarta>) inputStream.readObject();
+
+            		for (Map.Entry<Carta, AtributoCarta> entry : mapa.entrySet()) {
+            		    cartaAdversario = entry.getKey();
+            		    atributoEscolhido = entry.getValue();
+            		}
 
                     // pega carta
                     outputStream.writeObject(
-                    		RegrasJogo.compararCarta((Carta) cartaAdversario, new AtributoVelocidade(157))
+                    		RegrasJogo.compararCarta(cartaAdversario, atributoEscolhido)
     				);
 
                     sleep(500);
