@@ -38,11 +38,10 @@ public final class RegrasJogo {
 	}
 
 	public static boolean perdeu() {
+		if (JOGADOR.deckIsEmpty()) {
+			System.out.println("Você PERDEU!!!.");
+		}
 		return JOGADOR.deckIsEmpty();
-	}
-
-	public static boolean fimDeJogo() {
-		return false;
 	}
 
 	public static Carta compararCarta(Carta cartaAdversario, AtributoCarta atributo) {
@@ -68,22 +67,29 @@ public final class RegrasJogo {
 
 	public static void turno() {
 		Socket socket = null;
+		Socket socketToServer;
 		Scanner scanner = new Scanner(System.in);
 		Carta cartaEmJogo = JOGADOR.getCartaTopoDeck();
 		Carta cartaAdversario;
 
-		printDetalhesCarta(cartaEmJogo);
-
-		System.out.println("Escolha um atributo para comparar:");
-		int iAtributo = scanner.nextInt();
-
-		AtributoCarta atributoEscolhido = cartaEmJogo.getListaAtributos().get(iAtributo);
-
-		Socket socketToServer;
 		try {
 			socketToServer = new Socket("localhost", ADVERSARIO.getPorta());
 			ObjectOutputStream outputStream = new ObjectOutputStream(socketToServer.getOutputStream());
 			ObjectInputStream inputStream = new ObjectInputStream(socketToServer.getInputStream());
+
+			//verifica se o vc perdeu
+			outputStream.writeObject("adversarioPerdeu");
+			if ((boolean) inputStream.readObject()) {
+				System.out.println("Você GANHOU!!!.");
+				System.exit(0);
+			}
+
+			printDetalhesCarta(cartaEmJogo);
+
+			System.out.println("Escolha um atributo para comparar:");
+			int iAtributo = scanner.nextInt();
+
+			AtributoCarta atributoEscolhido = cartaEmJogo.getListaAtributos().get(iAtributo);
 
 			HashMap<Carta, AtributoCarta> mapa = new HashMap<Carta, AtributoCarta>();
 			mapa.put(cartaEmJogo, atributoEscolhido);
@@ -91,6 +97,9 @@ public final class RegrasJogo {
 
 			cartaAdversario = (Carta) inputStream.readObject();
 			compararCarta(cartaAdversario, atributoEscolhido);
+
+			RegrasJogo.turnoAdversario();
+
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

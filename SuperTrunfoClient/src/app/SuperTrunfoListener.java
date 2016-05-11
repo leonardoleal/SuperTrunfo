@@ -50,22 +50,34 @@ public class SuperTrunfoListener extends Thread {
         public void run() {
             while (true) {
                 try {
-                	Carta cartaAdversario = null;
-                	AtributoCarta atributoEscolhido = null;
-                    Map<Carta, AtributoCarta> mapa = (HashMap<Carta, AtributoCarta>) inputStream.readObject();
+                	Object data = inputStream.readObject();
 
-            		for (Map.Entry<Carta, AtributoCarta> entry : mapa.entrySet()) {
-            		    cartaAdversario = entry.getKey();
-            		    atributoEscolhido = entry.getValue();
-            		}
+                	if (data instanceof Map) {
+	                	Carta cartaAdversario = null;
+	                	AtributoCarta atributoEscolhido = null;
+	                    Map<Carta, AtributoCarta> mapa = (HashMap<Carta, AtributoCarta>) data;
 
-                    // pega carta
-                    outputStream.writeObject(
-                    		RegrasJogo.compararCarta(cartaAdversario, atributoEscolhido)
-    				);
+	            		for (Map.Entry<Carta, AtributoCarta> entry : mapa.entrySet()) {
+	            		    cartaAdversario = entry.getKey();
+	            		    atributoEscolhido = entry.getValue();
+	            		}
 
-                    sleep(500);
-                    RegrasJogo.turno();
+	                    // pega carta
+	                    outputStream.writeObject(
+	                    		RegrasJogo.compararCarta(cartaAdversario, atributoEscolhido)
+	    				);
+
+	                    sleep(500);
+	                    RegrasJogo.turno();
+                	} else if (data instanceof String) {
+                		if ("adversarioPerdeu".equals(data)) {
+                			boolean b = RegrasJogo.perdeu();
+                			outputStream.writeObject(b);
+                			if (b) {
+                				System.exit(0);
+							}
+						}
+                	}
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
