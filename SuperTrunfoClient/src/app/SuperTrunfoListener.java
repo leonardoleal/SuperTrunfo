@@ -56,11 +56,15 @@ public class SuperTrunfoListener extends Thread {
                     		RegrasJogo.compararCarta((Carta) cartaAdversario, new AtributoVelocidade(157))
     				);
 
+                    sleep(500);
+                    RegrasJogo.turno();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
-                }
+                } catch (InterruptedException e) {
+					e.printStackTrace();
+				}
             }
         }
     }
