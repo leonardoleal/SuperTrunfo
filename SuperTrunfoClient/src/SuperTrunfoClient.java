@@ -8,32 +8,70 @@ import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import app.RegrasJogo;
+import app.SuperTrunfoListener;
 import app.interfaces.ISuperTrunfo;
 import model.Jogador;
 
 public class SuperTrunfoClient {
-
-	private static Jogador jogador;
-	private static Jogador adversario;
-	private static int porta;
+	private static Scanner scanner = new Scanner(System.in);
 
 	public static void main(String[] args) throws UnknownHostException {
-		Scanner scanner = new Scanner(System.in);
-		porta = portaAleatoria();
-		String host = InetAddress.getLocalHost().toString() +":"+ porta;
+		String host = InetAddress.getLocalHost().toString();
+		int porta = portaAleatoria();
+		Jogador jogador, adversario = null;
 
 		System.out.println("Digite seu nome: ");
-		jogador = new Jogador(scanner.nextLine(), host);
-
-		iniciaServicoEntrada();
+//		jogador = new Jogador(scanner.nextLine(), host +":"+ porta);
+		jogador = new Jogador(scanner.nextLine(), host, porta);
 
 		// comunica com o servidor
+		System.out.println("Iniciando conexão com o servidor...");
+		adversario = solicitarInfoServidor(jogador);
+		System.out.println("Seu adversário é:"+ adversario.getNome());
+
+		// inicia jogo
+		iniciaJogo(jogador, adversario);
+
+		iniciaServicoP2P(porta);
+
+		scanner.close();
+    }
+
+	private static void iniciaJogo(Jogador jogador, Jogador adversario) {
+
+		new RegrasJogo(jogador, adversario);
+
+		if (adversario.isDesafiado()) {
+			// vez do adversário
+			RegrasJogo.turnoAdversario();
+		} else {
+			//você inicia
+			RegrasJogo.turno();
+		}
+	}
+
+	private static void iniciaServicoP2P(int porta) {
 		try {
+			SuperTrunfoListener superTrunfoListener = new SuperTrunfoListener(porta);
+
+			do {
+				if (!superTrunfoListener.isAlive()) {
+					superTrunfoListener.start();
+				}
+			} while (true);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static Jogador solicitarInfoServidor(Jogador jogador) {
+		try {
+			Jogador adversario = null;
 			ISuperTrunfo rSuperTrunfo = (ISuperTrunfo) Naming.lookup("rmi://localhost:1099/app/SuperTrunfo");
 
 			System.out.println("Aguardando na fila...");
@@ -46,10 +84,9 @@ public class SuperTrunfoClient {
 				} catch (InterruptedException e) {}
 			} while(adversario == null);
 
-			System.out.println("Seu adversário é:"+ adversario.getNome());
-
 			jogador.setDeck(rSuperTrunfo.distribuirCartas());
 
+			return adversario;
 		} catch (RemoteException ex) {
 			Logger.getLogger(SuperTrunfoClient.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (NotBoundException ex) {
@@ -58,15 +95,8 @@ public class SuperTrunfoClient {
 			Logger.getLogger(SuperTrunfoClient.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		// inicia jogo
-		if (adversario.isDesafiado()) {
-
-		} else {
-			//você inicia
-		}
-
-		scanner.close();
-    }
+		return null;
+	}
 
 	private static int portaAleatoria() {
 		try {
@@ -78,22 +108,5 @@ public class SuperTrunfoClient {
 			e.printStackTrace();
 		}
 		return 0;
-	}
-
-	private static void iniciaServicoEntrada() {
-		try {
-//            ISuperTrunfo superTrunfo = new SuperTrunfo();
-//            ISistemaEleitoral sistemaEleitoral = new SistemaEleitoral();
-
-            LocateRegistry.createRegistry(porta);
-
-//            Naming.rebind("app/UrnaEleicao", urnaEleicao);
-//            Naming.rebind("app/SistemaEleitoral", sistemaEleitoral);
-
-        } catch (RemoteException ex) {
-//            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (MalformedURLException ex) {
-//            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-        }
 	}
 }

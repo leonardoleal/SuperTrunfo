@@ -21,7 +21,7 @@ public class RepositorioCartas {
 				new Carta("Abt-Beetle 2,0 i"
 					, Arrays.asList(new AtributoCarta[]  {
 							new AtributoVelocidade(205)
-							, new AtributoZeroCem(8.5)
+							, new AtributoZeroCem(-8.5)
 						})
 				)
 		);
@@ -30,7 +30,7 @@ public class RepositorioCartas {
 				new Carta("Abt-As 4"
 					, Arrays.asList(new AtributoCarta[]  {
 							new AtributoVelocidade(277)
-							, new AtributoZeroCem(5.4)
+							, new AtributoZeroCem(-5.4)
 						})
 				)
 		);
@@ -39,7 +39,7 @@ public class RepositorioCartas {
 				new Carta("Abt-Golf GTI 1.8 T"
 					, Arrays.asList(new AtributoCarta[]  {
 							new AtributoVelocidade(246)
-							, new AtributoZeroCem(6.5)
+							, new AtributoZeroCem(-6.5)
 						})
 				)
 		);
@@ -48,7 +48,7 @@ public class RepositorioCartas {
 				new Carta("Abt-TT limited"
 					, Arrays.asList(new AtributoCarta[]  {
 							new AtributoVelocidade(265)
-							, new AtributoZeroCem(5.6)
+							, new AtributoZeroCem(-5.6)
 						})
 				)
 		);

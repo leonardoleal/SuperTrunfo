@@ -9,11 +9,13 @@ public class Jogador implements Serializable {
 	private String nome;
 	private Queue<Carta> deck;
 	private String host;
+	private int porta;
 	private boolean desafiado;
 
-	public Jogador(String nome, String host) {
+	public Jogador(String nome, String host, int porta) {
 		this.nome = nome;
 		this.host = host;
+		this.porta = porta;
 	}
 
 	public String getNome() {
@@ -25,6 +27,10 @@ public class Jogador implements Serializable {
 	}
 
 	public Carta getCartaTopoDeck() {
+		return deck.peek();
+	}
+
+	public Carta removeCartaTopoDeck() {
 		return deck.remove();
 	}
 
@@ -34,6 +40,10 @@ public class Jogador implements Serializable {
 
 	public String getHost() {
 		return host;
+	}
+
+	public int getPorta() {
+		return porta;
 	}
 
 	public boolean isDesafiado() {
@@ -47,5 +57,9 @@ public class Jogador implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		return this.nome.equals(((Jogador) obj).getNome());
+	}
+
+	public boolean deckIsEmpty() {
+		return this.deck.isEmpty();
 	}
 }
